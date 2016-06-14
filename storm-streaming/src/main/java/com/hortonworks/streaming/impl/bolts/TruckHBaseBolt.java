@@ -84,14 +84,14 @@ public class TruckHBaseBolt implements IRichBolt {
 
     LOG.info("About to insert tuple[" + input + "] into HBase...");
 
-    String driverId = input.getStringByField("driverId");
-    String truckId = input.getStringByField("truckId");
-    String eventTime = input.getStringByField("eventTime");
+    int driverId = input.getIntegerByField("driverId");
+    int truckId = input.getIntegerByField("truckId");
+    Timestamp eventTime = (Timestamp) input.getValueByField("eventTime");
     String eventType = input.getStringByField("eventType");
-    String longitude = input.getStringByField("longitude");
-    String latitude = input.getStringByField("latitude");
+    double longitude = input.getDoubleByField("longitude");
+    double latitude = input.getDoubleByField("latitude");
     String driverName = input.getStringByField("driverName");
-    String routeId = input.getStringByField("routeId");
+    int routeId = input.getIntegerByField("routeId");
     String routeName = input.getStringByField("routeName");
 
     long incidentTotalCount = getInfractionCountForDriver(driverId);
@@ -141,11 +141,10 @@ public class TruckHBaseBolt implements IRichBolt {
 
   }
 
-  private Put constructRow(String columnFamily, String driverId, String truckId, String eventTime, String eventType,
-                           String latitude, String longitude, String driverName, String routeId, String routeName) {
+  private Put constructRow(String columnFamily, int driverId, int truckId, Timestamp eventTime, String eventType,
+                           double latitude, double longitude, String driverName, int routeId, String routeName) {
 
-	Timestamp eventTime1 = Timestamp.valueOf(eventTime);
-    String rowKey = consructKey(driverId, truckId, eventTime1);
+    String rowKey = consructKey(driverId, truckId, eventTime);
     System.out.println("Record with key[" + rowKey + "] going to be inserted...");
     Put put = new Put(Bytes.toBytes(rowKey));
 
@@ -156,7 +155,7 @@ public class TruckHBaseBolt implements IRichBolt {
     put.add(Bytes.toBytes(columnFamily), Bytes.toBytes(truckColumn), Bytes.toBytes(truckId));
 
     String eventTimeColumn = "eventTime";
-    long eventTimeValue = eventTime1.getTime();
+    long eventTimeValue = eventTime.getTime();
     put.add(Bytes.toBytes(columnFamily), Bytes.toBytes(eventTimeColumn), Bytes.toBytes(eventTimeValue));
 
     String eventTypeColumn = "eventType";
@@ -180,10 +179,9 @@ public class TruckHBaseBolt implements IRichBolt {
   }
 
 
-  private String consructKey(String driverId, String truckId, Timestamp ts2) {
+  private String consructKey(int driverId, int truckId, Timestamp ts2) {
     long reverseTime = Long.MAX_VALUE - ts2.getTime();
-    String reverseTime1 = Long.toString(reverseTime);
-    String rowKey = driverId + "|" + truckId + "|" + reverseTime1;
+    String rowKey = driverId + "|" + truckId + "|" + reverseTime;
     return rowKey;
   }
 
@@ -211,7 +209,7 @@ public class TruckHBaseBolt implements IRichBolt {
     return null;
   }
 
-  private long getInfractionCountForDriver(String driverId) {
+  private long getInfractionCountForDriver(int driverId) {
     try {
       byte[] driverCount = Bytes.toBytes(driverId);
       Get get = new Get(driverCount);
