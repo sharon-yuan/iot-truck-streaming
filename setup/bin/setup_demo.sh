@@ -22,6 +22,13 @@ echo '*** Starting ActiveMQ...'
 echo '*** Importing hbase-site.xml into storm topology...'
 cp /etc/hbase/conf/hbase-site.xml storm-streaming/src/main/resources
 
+echo '*** Importing hive-site.xml into storm topology...'
+cp /etc/hive/conf/hive-site.xml storm-streaming/src/main/resources
+
+echo '*** Importing hdfs-site.xml, core-site.xml into storm topology...'
+cp /etc/hive/conf/hdfs-site.xml storm-streaming/src/main/resources
+cp /etc/hive/conf/core-site.xml storm-streaming/src/main/resources
+
 echo '*** Exporting demo configuration...'
 mkdir -p /etc/storm_demo
 cp config.properties /etc/storm_demo
@@ -63,8 +70,8 @@ hdfs dfs -put ./truckml/TruckDemoModel-pmml.xml /tmp/pmml/TruckDemoModel-pmml.xm
 HDP_VERSION=`hdp-select status hadoop-client | sed 's/hadoop-client - \([0-9]\.[0-9]\).*/\1/'`
 if [ $HDP_VERSION == "2.5" ]
 then
-	echo "Detected 2.5, copying pom25.xml"
-	mv -f storm-streaming/pom25.xml storm-streaming/pom.xml
+        echo "Detected 2.5, copying pom25.xml"
+        mv -f storm-streaming/pom25.xml storm-streaming/pom.xml
 elif [ $HDP_VERSION == "2.4" ]
 then
 	echo "Detected 2.4, copying pom24.xml"
@@ -83,4 +90,4 @@ else
 fi
 
 echo '*** Building and installing demo modules (may take a few minutes)...'
-/root/maven/bin/mvn clean install -DskipTests=true
+/usr/bin/mvn clean install -DskipTests=true
