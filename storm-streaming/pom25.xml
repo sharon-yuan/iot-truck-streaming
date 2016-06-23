@@ -15,7 +15,7 @@
         <storm.hdfs.version>1.0.1.2.5.0.0-770</storm.hdfs.version>
         <kafka.version>0.10.0.2.5.0.0-770</kafka.version>
         <hbase.version>1.1.2.2.5.0.0-770</hbase.version>
-        <hive.version>2.1.0.2.5.0.0-770</hive.version>
+        <hive.version>2.1.0.2.5.0.0-787</hive.version>
         <hadoop.version>2.7.1.2.5.0.0-770</hadoop.version>
         <spark.version>1.6.0</spark.version>
         <phoenix.version>4.7.0.2.5.0.0-770</phoenix.version>
