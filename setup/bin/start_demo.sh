@@ -8,7 +8,7 @@ then
 	setup/bin/cleanup.sh
 	
 	cd storm-streaming
-	/usr/bin/mvn -DskipTests clean install
+	/root/maven/bin/mvn -DskipTests clean install
 	cd ..
 fi
 
@@ -39,5 +39,5 @@ startWait KAFKA
 echo 'Starting the demo webapp...'
 cd storm-demo-webapp
 cp -R routes /etc/storm_demo
-/usr/bin/mvn -DskipTests clean package
-/usr/bin/mvn jetty:run -Djetty.port=8081
+ /root/maven/bin/mvn -DskipTests clean package
+/root/maven/bin/mvn jetty:run -Djetty.port=8081
