@@ -226,7 +226,7 @@ public class TruckHBaseBolt implements IRichBolt {
       return count;
     } catch (Exception e) {
       LOG.error("Error getting infraction count", e);
-      return Long.MIN_VALUE
+      return Long.MIN_VALUE;
       //throw new RuntimeException("Error getting infraction count");
     }
   }
