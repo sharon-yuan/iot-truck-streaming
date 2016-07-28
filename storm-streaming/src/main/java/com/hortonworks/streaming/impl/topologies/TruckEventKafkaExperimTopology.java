@@ -43,12 +43,12 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     }
 
     public void buildAndSubmit() throws Exception {
-        /* This conf is for Storm and it needs be configured with things like the following:
+        /* This config is for Storm and it needs be configured with things like the following:
 		 * 	Zookeeper server, nimbus server, ports, etc... All of this configuration will be picked up
 		 * in the ~/.storm/storm.yaml file that will be located on each storm node.
 		 */
-        Config conf = new Config();
-        conf.setDebug(true);
+        Config config = new Config();
+        config.setDebug(true);
 
         TopologyBuilder builder = new TopologyBuilder();
 
@@ -70,15 +70,15 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         /* Set the number of workers that will be spun up for this topology.
 		 * Each worker represents a JVM where executor thread will be spawned from */
         Integer topologyWorkers = Integer.valueOf(topologyConfig.getProperty("storm.trucker.topology.workers"));
-        conf.put(Config.TOPOLOGY_WORKERS, topologyWorkers);
+        config.put(Config.TOPOLOGY_WORKERS, topologyWorkers);
 
         //Read the nimbus host in from the config file as well
         String nimbusHost = topologyConfig.getProperty("nimbus.host");
-        conf.put(Config.NIMBUS_HOST, nimbusHost);
+        config.put(Config.NIMBUS_HOST, nimbusHost);
 
         //Try to submit topology
         try {
-            StormSubmitter.submitTopology("truck-event-processor", conf, builder.createTopology());
+            StormSubmitter.submitTopology("truck-event-processor", config, builder.createTopology());
         } catch (Exception e) {
             LOG.error("Error submiting Topology", e);
         }
