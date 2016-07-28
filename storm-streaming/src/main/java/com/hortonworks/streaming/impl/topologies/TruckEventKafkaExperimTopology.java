@@ -1,21 +1,16 @@
+//Previous import packages from TruckEventKafkatopology
 package com.hortonworks.streaming.impl.topologies;
-package org.apache.storm.hbase.topology;
-
-
-import org.apache.storm.Config;
-import org.apache.storm.StormSubmitter;
-import org.apache.storm.spout.SchemeAsMultiScheme;
-import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.tuple.Fields;
+import backtype.storm.Config;
+import backtype.storm.StormSubmitter;
+import backtype.storm.spout.SchemeAsMultiScheme;
+import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.tuple.Fields;
 import com.hortonworks.streaming.impl.bolts.*;
 import com.hortonworks.streaming.impl.bolts.hdfs.FileTimeRotationPolicy;
 import com.hortonworks.streaming.impl.bolts.hive.HiveTablePartitionAction;
 import com.hortonworks.streaming.impl.kafka.TruckScheme2;
 import org.apache.log4j.Logger;
 import org.apache.storm.hdfs.bolt.HdfsBolt;
-import org.apache.storm.hbase.bolt.HBaseBolt;
-import org.apache.storm.hbase.bolt.mapper.SimpleHBaseMapper;
-import org.apache.storm.hbase.security.HBaseSecurityUtil;
 import org.apache.storm.hdfs.bolt.format.DefaultFileNameFormat;
 import org.apache.storm.hdfs.bolt.format.DelimitedRecordFormat;
 import org.apache.storm.hdfs.bolt.format.FileNameFormat;
@@ -26,6 +21,12 @@ import org.apache.storm.kafka.BrokerHosts;
 import org.apache.storm.kafka.KafkaSpout;
 import org.apache.storm.kafka.SpoutConfig;
 import org.apache.storm.kafka.ZkHosts;
+
+//New import packages for topology
+package org.apache.storm.hbase.topology;
+import org.apache.storm.hbase.bolt.HBaseBolt;
+import org.apache.storm.hbase.bolt.mapper.SimpleHBaseMapper;
+import org.apache.storm.hbase.security.HBaseSecurityUtil;
 import java.util.HashMap;
 import java.util.Map;
 
