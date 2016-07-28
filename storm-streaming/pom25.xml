@@ -10,9 +10,9 @@
 
     <properties>
 
-        <storm.version>1.0.1.2.5.0.0-817</storm.version>
-        <storm.kafka.version>1.0.1.2.5.0.0-817</storm.kafka.version>
-        <storm.hdfs.version>1.0.1.2.5.0.0-817</storm.hdfs.version>
+        <storm.version>1.0.1.2.5.0.0-1092</storm.version>
+        <storm.kafka.version>1.0.1.2.5.0.0-1092</storm.kafka.version>
+        <storm.hdfs.version>1.0.1.2.5.0.0-1092</storm.hdfs.version>
         <kafka.version>0.10.0.2.5.0.0-817</kafka.version>
         <hbase.version>1.1.2.2.5.0.0-817</hbase.version>
         <hive.version>2.1.0.2.5.0.0-817</hive.version>
