@@ -1,11 +1,19 @@
 package org.apache.storm.hbase.bolt;
+//previous imported packages from TruckHBaseBolt
+import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.IRichBolt;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.tuple.Fields;
+import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.log4j.Logger;
+import java.sql.Timestamp;
+import java.util.Map;
+import java.util.Properties;
 
-import org.apache.storm.task.OutputCollector;
-import org.apache.storm.task.TopologyContext;
-import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.tuple.Fields;
-import org.apache.storm.tuple.Tuple;
-import org.apache.storm.tuple.Values;
+//new imported packages for TruckHBaseBolt
 import org.apache.storm.utils.BatchHelper;
 import org.apache.storm.utils.TupleUtils;
 import org.apache.hadoop.hbase.client.Durability;
@@ -13,18 +21,13 @@ import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.storm.hbase.bolt.mapper.SimpleHBaseMapper;
 import org.apache.storm.hbase.security.HBaseSecurityUtil;
 import org.apache.storm.hbase.common.ColumnList;
-import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
+
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
-
-import java.sql.Timestamp;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * Basic bolt for writing to HBase.
