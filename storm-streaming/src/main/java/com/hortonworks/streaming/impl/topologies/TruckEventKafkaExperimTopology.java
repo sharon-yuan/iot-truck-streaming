@@ -1,10 +1,10 @@
 //Previous import packages from TruckEventKafkatopology
 package com.hortonworks.streaming.impl.topologies;
-import backtype.storm.Config;
-import backtype.storm.StormSubmitter;
-import backtype.storm.spout.SchemeAsMultiScheme;
-import backtype.storm.topology.TopologyBuilder;
-import backtype.storm.tuple.Fields;
+import org.apache.storm.Config;
+import org.apache.storm.StormSubmitter;
+import org.apache.storm.spout.SchemeAsMultiScheme;
+import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.tuple.Fields;
 import com.hortonworks.streaming.impl.bolts.*;
 import com.hortonworks.streaming.impl.bolts.hdfs.FileTimeRotationPolicy;
 import com.hortonworks.streaming.impl.bolts.hive.HiveTablePartitionAction;
