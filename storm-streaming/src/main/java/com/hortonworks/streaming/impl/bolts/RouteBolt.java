@@ -72,7 +72,7 @@ public class RouteBolt  extends HBaseBolt {
             try {
                 //Store the incident event in HBase
                 SimpleHBaseMapper mapper = new SimpleHBaseMapper()
-                        .withRowKeyField(constructKey("driverId", "truckId", "eventTime"))
+                        .withRowKeyField("driverId" + "|" + "truckId" + "|" + "eventTime")
                         .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude",
                                 "driverName", "routeId", "routeName"))
                         .withColumnFamily(EVENTS_TABLE_COLUMN_FAMILY_NAME);
