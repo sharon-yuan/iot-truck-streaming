@@ -23,7 +23,7 @@ import org.apache.storm.kafka.SpoutConfig;
 import org.apache.storm.kafka.ZkHosts;
 
 //New import packages for topology
-package org.apache.storm.hbase.topology;
+//package org.apache.storm.hbase.topology;
 import org.apache.storm.hbase.bolt.HBaseBolt;
 import org.apache.storm.hbase.bolt.mapper.SimpleHBaseMapper;
 import org.apache.storm.hbase.security.HBaseSecurityUtil;
@@ -41,21 +41,14 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         String configFileLocation = args[0];
         TruckEventKafkaExperimTopology truckTopology = new TruckEventKafkaExperimTopology(configFileLocation);
         truckTopology.buildAndSubmit();
-    }
-
-    public void buildAndSubmit() throws Exception {
+        
         /* This config is for Storm and it needs be configured with things like the following:
 		 * 	Zookeeper server, nimbus server, ports, etc... All of this configuration will be picked up
 		 * in the ~/.storm/storm.yaml file that will be located on each storm node.
 		 */
         Config config = new Config();
         config.setDebug(true);
-
-        TopologyBuilder builder = new TopologyBuilder();
-
-        /* Set up Kafka Spout to ingest from */
-        configureKafkaSpout(builder);
-
+        
         /* Setup HBase Bolt to persist violations and all events (if configured to do so)*/
         Map<String, Object> hbConf = new HashMap<String, Object>();
         if(args.length > 0){
@@ -66,8 +59,7 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         HBaseBolt hbase = new HBaseBolt("driver_dangerous_events", mapper).withConfigKey("hbase.conf");
         builder.setBolt("hbase_bolt", hbase, 2).fieldsGrouping("kafkaSpout", new Fields("driverId", "truckId",
                 "eventTime", "eventType", "latitude", "longitude", "driverName", "routeId", "routeName"));
-
-
+                
         /* Set the number of workers that will be spun up for this topology.
 		 * Each worker represents a JVM where executor thread will be spawned from */
         Integer topologyWorkers = Integer.valueOf(topologyConfig.getProperty("storm.trucker.topology.workers"));
@@ -75,14 +67,24 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
 
         //Read the nimbus host in from the config file as well
         String nimbusHost = topologyConfig.getProperty("nimbus.host");
-        config.put(Config.NIMBUS_HOST, nimbusHost);
-
+        config.put(Config.NIMBUS_SEED, nimbusHost);
+        
         //Try to submit topology
         try {
             StormSubmitter.submitTopology("truck-event-processor", config, builder.createTopology());
         } catch (Exception e) {
             LOG.error("Error submiting Topology", e);
         }
+    }
+
+    public void buildAndSubmit() throws Exception {
+        
+
+        TopologyBuilder builder = new TopologyBuilder();
+
+        /* Set up Kafka Spout to ingest from */
+        configureKafkaSpout(builder);
+        
     }
 
 
