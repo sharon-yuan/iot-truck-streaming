@@ -71,6 +71,8 @@ public class RouteBolt  extends HBaseBolt {
 
         long incidentTotalCount = getInfractionCountForDriver(driverId);
 
+        /*
+        //Moved the hbase mapper to the topology
         if (!eventType.equals("Normal")) {
             try {
                 //Store the incident event in HBase
@@ -85,6 +87,7 @@ public class RouteBolt  extends HBaseBolt {
                 LOG.error("	Error inserting violation event into HBase table", e);
             }
         }
+        */
 
         collector.emit(input, new Values(driverId, truckId, eventTime, eventType, longitude, latitude,
                 incidentTotalCount, driverName, routeId, routeName));
