@@ -43,8 +43,10 @@ public class RouteBolt  extends HBaseBolt {
     private static final long serialVersionUID = 2946379346389650318L;
 
     //three HBase table names with their associated column family names
+    /*
     private static final String DANGEROUS_EVENTS_TABLE_NAME = "driver_dangerous_events";
     private static final String EVENTS_TABLE_COLUMN_FAMILY_NAME = "events";
+    */
 
 
     private static final String EVENTS_TABLE_NAME = "driver_events";
