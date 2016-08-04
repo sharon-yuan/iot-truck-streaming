@@ -78,7 +78,7 @@ public class RouteBolt extends HBaseBolt {
         String routeName = input.getStringByField("routeName");
 
         long incidentTotalCount = getInfractionCountForDriver(driverId);
-
+        String hbaseRowKey = constructHbaseRowKey(driverId, truckId, eventTime);
         /*
         //Moved the hbase mapper to the topology
         if (!eventType.equals("Normal")) {
@@ -98,7 +98,7 @@ public class RouteBolt extends HBaseBolt {
         */
 
         collector.emit(input, new Values(driverId, truckId, eventTime, eventType, longitude, latitude,
-                incidentTotalCount, driverName, routeId, routeName));
+                incidentTotalCount, driverName, routeId, routeName, hbaseRowKey));
 
         //acknowledge even if there is an error
         collector.ack(input);
@@ -125,7 +125,18 @@ public class RouteBolt extends HBaseBolt {
             //throw new RuntimeException("Error getting infraction count");
         }
     }
+    
+     @Override
+     public void declareOutputFields(OutputFieldsDeclarer declarer) {
+         declarer.declare(new Fields("driverId", "truckId", "eventTime", "eventType", "longitude", "latitude",
+            "incidentTotalCount", "driverName", "routeId", "routeName", "hbaseRowKey"));
+    }
 
+    private String constructHbaseRowKey(int driverId, int truckId, Timestamp ts2) {
+        long reverseTime = Long.MAX_VALUE - ts2.getTime();
+        String rowKey = driverId + "|" + truckId + "|" + reverseTime;
+        return rowKey;
+  }
 
 
 }
