@@ -126,7 +126,7 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     	/* Setup HBase Bolt to persist violations and all events (if configured to do so)*/
         Map<String, Object> hbConf = new HashMap<String, Object>();
         if(theArgs.length > 0){
-            hbConf.put("hbase.rootdir", theA:rgs[0]);
+            hbConf.put("hbase.rootdir", theArgs[0]);
         }
         config.put("hbase.conf", hbConf);
 
