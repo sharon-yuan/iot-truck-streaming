@@ -35,58 +35,21 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     private static final String DANGEROUS_EVENTS_TABLE_NAME = "driver_dangerous_events";
     private static final String EVENTS_TABLE_COLUMN_FAMILY_NAME = "events";
 
+    private String[] args;
+
     public TruckEventKafkaExperimTopology(String configFileLocation) throws Exception {
         super(configFileLocation);
     }
 
     public static void main(String[] args) throws Exception {
         String configFileLocation = args[0];
+        this.args = args;
         
         // kafkaspout ==> RouteBolt-writes to one hbase table
         TruckEventKafkaExperimTopology truckTopology = new TruckEventKafkaExperimTopology(configFileLocation);
         truckTopology.buildAndSubmit();
         
-        /* This config is for Storm and it needs be configured with things like the following:
-		 * 	Zookeeper server, nimbus server, ports, etc... All of this configuration will be picked up
-		 * in the ~/.storm/storm.yaml file that will be located on each storm node.
-		 */
-        Config config = new Config();
-        config.setDebug(true);
         
-        /* Setup HBase Bolt to persist violations and all events (if configured to do so)*/
-        Map<String, Object> hbConf = new HashMap<String, Object>();
-        if(args.length > 0){
-            hbConf.put("hbase.rootdir", args[0]);
-        }
-        config.put("hbase.conf", hbConf);
-
-	//try {
-                //Store the incident event in HBase Table driver_dangerous_events
-                SimpleHBaseMapper mapper = new SimpleHBaseMapper()
-                        .withRowKeyField("driverId" + "|" + "truckId" + "|" + "eventTime")
-                        .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude", 
-                                "driverName", "routeId", "routeName"))
-                        .withColumnFamily(EVENTS_TABLE_COLUMN_FAMILY_NAME);
-
-                LOG.info("Success inserting event into HBase table[" + DANGEROUS_EVENTS_TABLE_NAME + "]");
-        /*} catch(Exception e){
-                LOG.error("	Error inserting violation event into HBase table", e);
-        }*/
-
-        
-        HBaseBolt hbase = new HBaseBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper).withConfigKey("hbase.conf");
-        builder.setBolt("hbase_bolt", hbase, 2).fieldsGrouping("kafkaSpout", new Fields("driverId", "truckId",
-                "eventTime", "eventType", "latitude", "longitude", "driverName", "routeId", "routeName"));
-        /* End of HBase Setup */
-                
-        /* Set the number of workers that will be spun up for this topology.
-		 * Each worker represents a JVM where executor thread will be spawned from */
-        Integer topologyWorkers = Integer.valueOf(topologyConfig.getProperty("storm.trucker.topology.workers"));
-        config.put(Config.TOPOLOGY_WORKERS, topologyWorkers);
-
-        //Read the nimbus host in from the config file as well
-        String nimbusHost = topologyConfig.getProperty("nimbus.host");
-        config.put(Config.NIMBUS_SEED, nimbusHost);
         
         //Try to submit topology
         try {
@@ -97,12 +60,32 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     }
 
     public void buildAndSubmit() throws Exception {
-        
 
         TopologyBuilder builder = new TopologyBuilder();
 
+	/* This config is for Storm and it needs be configured with things like the following:
+		 * 	Zookeeper server, nimbus server, ports, etc... All of this configuration will be picked up
+		 * in the ~/.storm/storm.yaml file that will be located on each storm node.
+		 */
+        Config config = new Config();
+        config.setDebug(true);
+        
+        
+                
+        /* Set the number of workers that will be spun up for this topology.
+		 * Each worker represents a JVM where executor thread will be spawned from */
+        Integer topologyWorkers = Integer.valueOf(topologyConfig.getProperty("storm.trucker.topology.workers"));
+        config.put(Config.TOPOLOGY_WORKERS, topologyWorkers);
+
+        //Read the nimbus host in from the config file as well
+        String nimbusHost = topologyConfig.getProperty("nimbus.host");
+        config.put(Config.NIMBUS_SEED, nimbusHost);
+
         /* Set up Kafka Spout to ingest from */
         configureKafkaSpout(builder);
+        
+        /* Set up HBaseBolt to write to HBase tables */
+        configureHBaseBolt(builder, config);
         
     }
 
@@ -139,5 +122,32 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         spoutConfig.scheme = new SchemeAsMultiScheme(new TruckScheme2());
 
         return spoutConfig;
+    }
+    
+    public int configureHBaseBolt(TopologyBuilder builder, Config config){
+    	/* Setup HBase Bolt to persist violations and all events (if configured to do so)*/
+        Map<String, Object> hbConf = new HashMap<String, Object>();
+        if(this.args.length > 0){
+            hbConf.put("hbase.rootdir", this.args[0]);
+        }
+        config.put("hbase.conf", hbConf);
+
+	//try {
+                //Store the incident event in HBase Table driver_dangerous_events
+                SimpleHBaseMapper mapper = new SimpleHBaseMapper()
+                        .withRowKeyField("driverId" + "|" + "truckId" + "|" + "eventTime")
+                        .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude", 
+                                "driverName", "routeId", "routeName"))
+                        .withColumnFamily(EVENTS_TABLE_COLUMN_FAMILY_NAME);
+
+                LOG.info("Success inserting event into HBase table[" + DANGEROUS_EVENTS_TABLE_NAME + "]");
+        /*} catch(Exception e){
+                LOG.error("	Error inserting violation event into HBase table", e);
+        }*/
+
+        
+        HBaseBolt hbase = new HBaseBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper).withConfigKey("hbase.conf");
+        builder.setBolt("hbase_bolt", hbase, 2).fieldsGrouping("kafkaSpout", new Fields("driverId", "truckId",
+                "eventTime", "eventType", "latitude", "longitude", "driverName", "routeId", "routeName"));
     }
 }
