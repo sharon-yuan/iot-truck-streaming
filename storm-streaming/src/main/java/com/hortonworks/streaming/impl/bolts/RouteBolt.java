@@ -79,13 +79,13 @@ public class RouteBolt extends HBaseBolt {
 
         long incidentTotalCount = getInfractionCountForDriver(driverId);
         String hbaseRowKey = constructHbaseRowKey(driverId, truckId, eventTime);
-        /*
+        
         //Moved the hbase mapper to the topology
         if (!eventType.equals("Normal")) {
             try {
                 //Store the incident event in HBase
                 SimpleHBaseMapper mapper = new SimpleHBaseMapper()
-                        .withRowKeyField("driverId" + "|" + "truckId" + "|" + "eventTime")
+                        .withRowKeyField(hbaseRowKey)
                         .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude",
                                 "driverName", "routeId", "routeName"))
                         .withColumnFamily(EVENTS_TABLE_COLUMN_FAMILY_NAME);
@@ -95,7 +95,7 @@ public class RouteBolt extends HBaseBolt {
                 LOG.error("	Error inserting violation event into HBase table", e);
             }
         }
-        */
+        
 
         collector.emit(input, new Values(driverId, truckId, eventTime, eventType, longitude, latitude,
                 incidentTotalCount, driverName, routeId, routeName, hbaseRowKey));
