@@ -19,6 +19,7 @@ import org.apache.storm.utils.TupleUtils;
 import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.storm.hbase.bolt.HBaseBolt;
+import org.apache.storm.hbase.bolt.mapper.SimpleHBaseMapper;
 import org.apache.storm.hbase.bolt.mapper.HBaseMapper;
 import org.apache.storm.hbase.security.HBaseSecurityUtil;
 import org.apache.storm.hbase.common.ColumnList;
