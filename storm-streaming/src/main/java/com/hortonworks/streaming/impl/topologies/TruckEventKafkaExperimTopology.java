@@ -73,10 +73,11 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
                 LOG.error("	Error inserting violation event into HBase table", e);
         }
 
-        /* Set up HBase bolt to persist violations */
+        
         HBaseBolt hbase = new HBaseBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper).withConfigKey("hbase.conf");
         builder.setBolt("hbase_bolt", hbase, 2).fieldsGrouping("kafkaSpout", new Fields("driverId", "truckId",
                 "eventTime", "eventType", "latitude", "longitude", "driverName", "routeId", "routeName"));
+        /* End of HBase Setup */
                 
         /* Set the number of workers that will be spun up for this topology.
 		 * Each worker represents a JVM where executor thread will be spawned from */
