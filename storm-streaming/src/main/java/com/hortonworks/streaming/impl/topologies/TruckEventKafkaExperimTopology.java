@@ -35,7 +35,7 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     private static final String DANGEROUS_EVENTS_TABLE_NAME = "driver_dangerous_events";
     private static final String EVENTS_TABLE_COLUMN_FAMILY_NAME = "events";
 
-    private String[] args;
+    static private String[] args;
 
     public TruckEventKafkaExperimTopology(String configFileLocation) throws Exception {
         super(configFileLocation);
