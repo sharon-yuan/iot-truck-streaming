@@ -121,31 +121,10 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
 
         return spoutConfig;
     }
-    
     public void configureHBaseBolt(TopologyBuilder builder, Config config){
-    	/* Setup HBase Bolt to persist violations and all events (if configured to do so)*/
-        Map<String, Object> hbConf = new HashMap<String, Object>();
-        if(theArgs.length > 0){
-            hbConf.put("hbase.rootdir", theArgs[0]);
-        }
-        config.put("hbase.conf", hbConf);
-
-	//try {
-                //Store the incident event in HBase Table driver_dangerous_events
-                SimpleHBaseMapper mapper = new SimpleHBaseMapper()
-                        .withRowKeyField("driverId" + "|" + "truckId" + "|" + "eventTime")
-                        .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude", 
-                                "driverName", "routeId", "routeName"))
-                        .withColumnFamily(EVENTS_TABLE_COLUMN_FAMILY_NAME);
-
-                LOG.info("Success inserting event into HBase table[" + DANGEROUS_EVENTS_TABLE_NAME + "]");
-        /*} catch(Exception e){
-                LOG.error("	Error inserting violation event into HBase table", e);
-        }*/
-
-        
+    	
         HBaseBolt hbase = new HBaseBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper).withConfigKey("hbase.conf");
         builder.setBolt("hbase_bolt", hbase, 2).fieldsGrouping("kafkaSpout", new Fields("driverId", "truckId",
-                "eventTime", "eventType", "latitude", "longitude", "driverName", "routeId", "routeName"));
+                "eventTime", "eventType", "latitude", "longitude", "driverName", "routeId", "routeName", "hbaseRowKey"));
     }
 }
