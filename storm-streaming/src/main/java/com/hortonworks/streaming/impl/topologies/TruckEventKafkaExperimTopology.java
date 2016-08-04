@@ -23,7 +23,6 @@ import org.apache.storm.kafka.SpoutConfig;
 import org.apache.storm.kafka.ZkHosts;
 
 //New import packages for topology
-//package org.apache.storm.hbase.topology;
 import org.apache.storm.hbase.bolt.HBaseBolt;
 import org.apache.storm.hbase.bolt.mapper.SimpleHBaseMapper;
 import org.apache.storm.hbase.security.HBaseSecurityUtil;
@@ -32,6 +31,9 @@ import java.util.Map;
 
 public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     private static final Logger LOG = Logger.getLogger(TruckEventKafkaExperimTopology.class);
+    
+    private static final String DANGEROUS_EVENTS_TABLE_NAME = "driver_dangerous_events";
+    private static final String EVENTS_TABLE_COLUMN_FAMILY_NAME = "events";
 
     public TruckEventKafkaExperimTopology(String configFileLocation) throws Exception {
         super(configFileLocation);
@@ -39,6 +41,8 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
 
     public static void main(String[] args) throws Exception {
         String configFileLocation = args[0];
+        
+        // kafkaspout ==> RouteBolt-writes to one hbase table
         TruckEventKafkaExperimTopology truckTopology = new TruckEventKafkaExperimTopology(configFileLocation);
         truckTopology.buildAndSubmit();
         
@@ -56,7 +60,21 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         }
         config.put("hbase.conf", hbConf);
 
-        HBaseBolt hbase = new HBaseBolt("driver_dangerous_events", mapper).withConfigKey("hbase.conf");
+	try {
+                //Store the incident event in HBase Table driver_dangerous_events
+                SimpleHBaseMapper mapper = new SimpleHBaseMapper()
+                        .withRowKeyField("driverId" + "|" + "truckId" + "|" + "eventTime")
+                        .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude", 
+                                "driverName", "routeId", "routeName"))
+                        .withColumnFamily(EVENTS_TABLE_COLUMN_FAMILY_NAME);
+
+                LOG.info("Success inserting event into HBase table[" + DANGEROUS_EVENTS_TABLE_NAME + "]");
+        } catch(Exception e){
+                LOG.error("	Error inserting violation event into HBase table", e);
+        }
+
+        /* Set up HBase bolt to persist violations */
+        HBaseBolt hbase = new HBaseBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper).withConfigKey("hbase.conf");
         builder.setBolt("hbase_bolt", hbase, 2).fieldsGrouping("kafkaSpout", new Fields("driverId", "truckId",
                 "eventTime", "eventType", "latitude", "longitude", "driverName", "routeId", "routeName"));
                 
