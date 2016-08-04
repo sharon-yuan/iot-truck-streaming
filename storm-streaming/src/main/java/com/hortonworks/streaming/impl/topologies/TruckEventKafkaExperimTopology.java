@@ -70,7 +70,7 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
 
         //Read the nimbus host in from the config file as well
         String nimbusHost = topologyConfig.getProperty("nimbus.host");
-        config.put(Config.NIMBUS_SEED, nimbusHost);
+        config.put(Config.NIMBUS_HOST, nimbusHost);
 
         /* Set up Kafka Spout to ingest from */
         configureKafkaSpout(builder);
@@ -122,7 +122,7 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         return spoutConfig;
     }
     
-    public int configureHBaseBolt(TopologyBuilder builder, Config config){
+    public void configureHBaseBolt(TopologyBuilder builder, Config config){
     	/* Setup HBase Bolt to persist violations and all events (if configured to do so)*/
         Map<String, Object> hbConf = new HashMap<String, Object>();
         if(theArgs.length > 0){
