@@ -60,7 +60,7 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         }
         config.put("hbase.conf", hbConf);
 
-	try {
+	//try {
                 //Store the incident event in HBase Table driver_dangerous_events
                 SimpleHBaseMapper mapper = new SimpleHBaseMapper()
                         .withRowKeyField("driverId" + "|" + "truckId" + "|" + "eventTime")
@@ -69,9 +69,9 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
                         .withColumnFamily(EVENTS_TABLE_COLUMN_FAMILY_NAME);
 
                 LOG.info("Success inserting event into HBase table[" + DANGEROUS_EVENTS_TABLE_NAME + "]");
-        } catch(Exception e){
+        /*} catch(Exception e){
                 LOG.error("	Error inserting violation event into HBase table", e);
-        }
+        }*/
 
         
         HBaseBolt hbase = new HBaseBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper).withConfigKey("hbase.conf");
