@@ -18,7 +18,8 @@ import org.apache.storm.utils.BatchHelper;
 import org.apache.storm.utils.TupleUtils;
 import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Mutation;
-import org.apache.storm.hbase.bolt.mapper.SimpleHBaseMapper;
+import org.apache.storm.hbase.bolt.HBaseBolt;
+import org.apache.storm.hbase.bolt.mapper.HBaseMapper;
 import org.apache.storm.hbase.security.HBaseSecurityUtil;
 import org.apache.storm.hbase.common.ColumnList;
 
@@ -36,7 +37,7 @@ import java.util.LinkedList;
  *
  */
 
-public class RouteBolt  extends HBaseBolt {
+public class RouteBolt extends HBaseBolt {
 
     private static final Logger LOG = Logger.getLogger(TruckHBaseBolt.class);
     private static final byte[] INCIDENT_RUNNING_TOTAL_COLUMN = Bytes.toBytes("incidentRunningTotal");
@@ -56,9 +57,14 @@ public class RouteBolt  extends HBaseBolt {
     private static final String EVENTS_COUNT_TABLE_COLUMN_FAMILY_NAME = "counters";
 
     private OutputCollector collector;
+    
+    public RouteBolt(String tableName, HBaseMapper mapper){
+        super(tableName, mapper);
+    }
 
 
     public void execute(Tuple input) {
+        super.execute(input);
         LOG.info("About to insert tuple[" + input + "] into HBase...");
 
         int driverId = input.getIntegerByField("driverId");
