@@ -35,7 +35,7 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     private static final String DANGEROUS_EVENTS_TABLE_NAME = "driver_dangerous_events";
     private static final String EVENTS_TABLE_COLUMN_FAMILY_NAME = "events";
 
-    static private String[] args;
+    static private String[] theArgs;
 
     public TruckEventKafkaExperimTopology(String configFileLocation) throws Exception {
         super(configFileLocation);
@@ -43,20 +43,11 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
 
     public static void main(String[] args) throws Exception {
         String configFileLocation = args[0];
-        this.args = args;
+        theArgs = args;
         
         // kafkaspout ==> RouteBolt-writes to one hbase table
         TruckEventKafkaExperimTopology truckTopology = new TruckEventKafkaExperimTopology(configFileLocation);
         truckTopology.buildAndSubmit();
-        
-        
-        
-        //Try to submit topology
-        try {
-            StormSubmitter.submitTopology("truck-event-processor", config, builder.createTopology());
-        } catch (Exception e) {
-            LOG.error("Error submiting Topology", e);
-        }
     }
 
     public void buildAndSubmit() throws Exception {
@@ -86,6 +77,13 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         
         /* Set up HBaseBolt to write to HBase tables */
         configureHBaseBolt(builder, config);
+        
+        //Try to submit topology
+        try {
+            StormSubmitter.submitTopology("truck-event-processor", config, builder.createTopology());
+        } catch (Exception e) {
+            LOG.error("Error submiting Topology", e);
+        }
         
     }
 
@@ -127,8 +125,8 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     public int configureHBaseBolt(TopologyBuilder builder, Config config){
     	/* Setup HBase Bolt to persist violations and all events (if configured to do so)*/
         Map<String, Object> hbConf = new HashMap<String, Object>();
-        if(this.args.length > 0){
-            hbConf.put("hbase.rootdir", this.args[0]);
+        if(theArgs.length > 0){
+            hbConf.put("hbase.rootdir", theA:rgs[0]);
         }
         config.put("hbase.conf", hbConf);
 
