@@ -35,15 +35,12 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     private static final String DANGEROUS_EVENTS_TABLE_NAME = "driver_dangerous_events";
     private static final String EVENTS_TABLE_COLUMN_FAMILY_NAME = "events";
 
-    static private String[] theArgs;
-
     public TruckEventKafkaExperimTopology(String configFileLocation) throws Exception {
         super(configFileLocation);
     }
 
     public static void main(String[] args) throws Exception {
         String configFileLocation = args[0];
-        theArgs = args;
         
         // kafkaspout ==> RouteBolt-writes to one hbase table
         TruckEventKafkaExperimTopology truckTopology = new TruckEventKafkaExperimTopology(configFileLocation);
@@ -76,7 +73,7 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         configureKafkaSpout(builder);
         
         /* Set up HBaseBolt to write to HBase tables */
-        configureHBaseBolt(builder, config);
+        configureHBaseBolt(builder);
         
         //Try to submit topology
         try {
@@ -121,9 +118,9 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
 
         return spoutConfig;
     }
-    public void configureHBaseBolt(TopologyBuilder builder, Config config){
+    public void configureHBaseBolt(TopologyBuilder builder){
     	
-        HBaseBolt hbase = new HBaseBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper).withConfigKey("hbase.conf");
+        RouteBolt hbase = new RouteBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper).withConfigKey("hbase.conf");
         builder.setBolt("hbase_bolt", hbase, 2).fieldsGrouping("kafkaSpout", new Fields("driverId", "truckId",
                 "eventTime", "eventType", "latitude", "longitude", "driverName", "routeId", "routeName", "hbaseRowKey"));
     }
