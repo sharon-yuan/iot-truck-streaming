@@ -120,8 +120,9 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     }
     public void configureHBaseBolt(TopologyBuilder builder){
     	
-        RouteBolt hbase = new RouteBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper).withConfigKey("hbase.conf");
-        builder.setBolt("hbase_bolt", hbase, 2).fieldsGrouping("kafkaSpout", new Fields("driverId", "truckId",
+        RouteBolt hbase = new RouteBolt(topologyConfig);
+        //Defines new bolt in topology
+        builder.setBolt("route_bolt_hbase", hbase, 2).fieldsGrouping("kafkaSpout", new Fields("driverId", "truckId",
                 "eventTime", "eventType", "latitude", "longitude", "driverName", "routeId", "routeName", "hbaseRowKey"));
     }
 }
