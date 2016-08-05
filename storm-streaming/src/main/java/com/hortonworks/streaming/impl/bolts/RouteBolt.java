@@ -57,8 +57,8 @@ public class RouteBolt extends HBaseBolt {
     private OutputCollector collector;
     private boolean persistAllEvents;
     
-    public RouteBolt(String tableName, HBaseMapper mapper, Properties topologyConfig){
-        super(tableName, mapper);
+    public RouteBolt(Properties topologyConfig){
+        //checks if hbase property exists, then returns boolean
         this.persistAllEvents = Boolean.valueOf(topologyConfig.getProperty("hbase.persist.all.events")).booleanValue();
         LOG.info("The PersistAllEvents Flag is set to: " + persistAllEvents);
     }
@@ -68,6 +68,7 @@ public class RouteBolt extends HBaseBolt {
         super.execute(input);
         LOG.info("About to insert tuple[" + input + "] into HBase...");
 
+        //declare 11 variables to be emitted by bolt
         int driverId = input.getIntegerByField("driverId");
         int truckId = input.getIntegerByField("truckId");
         Timestamp eventTime = (Timestamp) input.getValueByField("eventTime");
@@ -81,7 +82,7 @@ public class RouteBolt extends HBaseBolt {
         long incidentTotalCount = getInfractionCountForDriver(driverId);
         String hbaseRowKey = constructHbaseRowKey(driverId, truckId, eventTime);
         
-        //Moved the hbase mapper to the topology
+        //Maps to HBase DangerousEventsTable and EventsCountTable when non-normal events exist
         if (!eventType.equals("Normal")) {
             try {
                 
@@ -91,17 +92,21 @@ public class RouteBolt extends HBaseBolt {
                 config.put("hbase.conf", hbConf);
 
                 //Store the incident event in HBase Table driver_dangerous_events
-                SimpleHBaseMapper mapper = new SimpleHBaseMapper()
+                SimpleHBaseMapper mapper_DangerousEventsTable = new SimpleHBaseMapper()
                         .withRowKeyField(hbaseRowKey)
                         .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude",
                                 "driverName", "routeId", "routeName"))
                         .withColumnFamily(EVENTS_TABLE_COLUMN_FAMILY_NAME);
                         
-                //Update the running count of all incidents for driver_dangerous_events_count
+                HBaseBolt hbase = new HBaseBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper__DangerousEventsTable).withConfigKey("hbase.conf");
+                        
+                //Update the running count of all incidents for driver_dangerous_events_count HBase Table
                 SimpleHBaseMapper mapper_EventsCountTable = new SimpleHBaseMapper()
                         .withRowKeyField("driverId")
                         .withCounterFields(new Fields("incidentRunningTotal"))
                         .withColumnFamily(EVENTS_COUNT_TABLE_COLUMN_FAMILY_NAME);
+                        
+                HBaseBolt hbase = new HBaseBolt(EVENTS_COUNT_TABLE_NAME, mapper_EventsCountTable).withConfigKey("hbase.conf");
 
                 LOG.info("Success inserting event into HBase table[" + DANGEROUS_EVENTS_TABLE_NAME + "]");
             } catch(Exception e){
@@ -121,6 +126,8 @@ public class RouteBolt extends HBaseBolt {
                                 "driverName", "routeId", "routeName"))
                         .withColumnFamily(ALL_EVENTS_TABLE_COLUMN_FAMILY_NAME);
                 
+                HBaseBolt hbase = new HBaseBolt(EVENTS_TABLE_NAME, mapper_DriverEventsTable).withConfigKey("hbase.conf");
+                
                 LOG.info("Success inserting event into HBase table[" + EVENTS_TABLE_NAME + "]");
             } catch (Exception e) {
                 LOG.error("	Error inserting event into HBase table[" + EVENTS_TABLE_NAME + "]", e);
@@ -128,6 +135,7 @@ public class RouteBolt extends HBaseBolt {
 
         }
 
+        //RouteBolt emits a tuple with 11 fields relating to truckevents
         collector.emit(input, new Values(driverId, truckId, eventTime, eventType, longitude, latitude,
                 incidentTotalCount, driverName, routeId, routeName, hbaseRowKey));
 
@@ -135,6 +143,7 @@ public class RouteBolt extends HBaseBolt {
         collector.ack(input);
     }
 
+    //retrieves infraction count per driver
     private long getInfractionCountForDriver(int driverId) {
         try {
             byte[] driverCount = Bytes.toBytes(driverId);
@@ -158,12 +167,15 @@ public class RouteBolt extends HBaseBolt {
     
     }
     
+    /*Declares RouteBolt emits 1-tuples with 11 fields called "driverId", "truckId", "eventTime", "eventType", "longitude", "latitude",
+            "incidentTotalCount", "driverName", "routeId", "routeName", "hbaseRowKey".*/
      @Override
      public void declareOutputFields(OutputFieldsDeclarer declarer) {
          declarer.declare(new Fields("driverId", "truckId", "eventTime", "eventType", "longitude", "latitude",
             "incidentTotalCount", "driverName", "routeId", "routeName", "hbaseRowKey"));
     }
 
+    //Constructs HBaseRowKey
     private String constructHbaseRowKey(int driverId, int truckId, Timestamp ts2) {
         long reverseTime = Long.MAX_VALUE - ts2.getTime();
         String rowKey = driverId + "|" + truckId + "|" + reverseTime;
