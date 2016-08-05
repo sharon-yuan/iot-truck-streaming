@@ -39,7 +39,7 @@ import java.util.LinkedList;
 
 public class RouteBolt extends HBaseBolt {
 
-    private static final Logger LOG = Logger.getLogger(TruckHBaseBolt.class);
+    private static final Logger LOG = Logger.getLogger(RouteBolt.class);
     private static final byte[] INCIDENT_RUNNING_TOTAL_COLUMN = Bytes.toBytes("incidentRunningTotal");
     private static final long serialVersionUID = 2946379346389650318L;
 
