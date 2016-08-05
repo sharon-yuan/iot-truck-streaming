@@ -56,8 +56,10 @@ public class RouteBolt extends HBaseBolt {
 
     private OutputCollector collector;
     
-    public RouteBolt(String tableName, HBaseMapper mapper){
+    public RouteBolt(String tableName, HBaseMapper mapper, Properties topologyConfig){
         super(tableName, mapper);
+        this.persistAllEvents = Boolean.valueOf(topologyConfig.getProperty("hbase.persist.all.events")).booleanValue();
+        LOG.info("The PersistAllEvents Flag is set to: " + persistAllEvents);
     }
 
 
@@ -93,6 +95,12 @@ public class RouteBolt extends HBaseBolt {
                         .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude",
                                 "driverName", "routeId", "routeName"))
                         .withColumnFamily(EVENTS_TABLE_COLUMN_FAMILY_NAME);
+                        
+                //Update the running count of all incidents for driver_dangerous_events_count
+                SimpleHBaseMapper mapper_EventsCountTable = new SimpleHBaseMapper()
+                        .withRowKeyField("driverId")
+                        .withCounterFields(new Fields("incidentRunningTotal"))
+                        .withColumnFamily(EVENTS_COUNT_TABLE_COLUMN_FAMILY_NAME);
 
                 LOG.info("Success inserting event into HBase table[" + DANGEROUS_EVENTS_TABLE_NAME + "]");
             } catch(Exception e){
@@ -100,6 +108,24 @@ public class RouteBolt extends HBaseBolt {
             }
         }
         
+        /* If persisting all events, then store into the driver_events table */
+        if (persistAllEvents) {
+
+            //Store the  event in HBase Table driver_events
+            try {
+
+                SimpleHBaseMapper mapper_DriverEventsTable = new SimpleHBaseMapper()
+                        .withRowKeyField(hbaseRowKey)
+                        .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude",
+                                "driverName", "routeId", "routeName"))
+                        .withColumnFamily(ALL_EVENTS_TABLE_COLUMN_FAMILY_NAME);
+                
+                LOG.info("Success inserting event into HBase table[" + EVENTS_TABLE_NAME + "]");
+            } catch (Exception e) {
+                LOG.error("	Error inserting event into HBase table[" + EVENTS_TABLE_NAME + "]", e);
+            }
+
+        }
 
         collector.emit(input, new Values(driverId, truckId, eventTime, eventType, longitude, latitude,
                 incidentTotalCount, driverName, routeId, routeName, hbaseRowKey));
@@ -128,6 +154,7 @@ public class RouteBolt extends HBaseBolt {
             //return Long.MIN_VALUE;
             //throw new RuntimeException("Error getting infraction count");
         }
+    
     }
     
      @Override
