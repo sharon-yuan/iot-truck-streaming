@@ -55,6 +55,7 @@ public class RouteBolt extends HBaseBolt {
     private static final String EVENTS_COUNT_TABLE_COLUMN_FAMILY_NAME = "counters";
 
     private OutputCollector collector;
+    private boolean persistAllEvents;
     
     public RouteBolt(String tableName, HBaseMapper mapper, Properties topologyConfig){
         super(tableName, mapper);
