@@ -86,7 +86,7 @@ public class RouteBolt extends HBaseBolt {
         if (!eventType.equals("Normal")) {
             try {
                 
-                /* Setup HBase Bolt to persist violations and all events (if configured to do so)*/
+                
                 Map<String, Object> hbConf = new HashMap<String, Object>();
         
                 config.put("hbase.conf", hbConf);
