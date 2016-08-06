@@ -22,7 +22,6 @@ import org.apache.storm.kafka.KafkaSpout;
 import org.apache.storm.kafka.SpoutConfig;
 import org.apache.storm.kafka.ZkHosts;
 
-//New import packages for topology
 import org.apache.storm.hbase.bolt.HBaseBolt;
 import org.apache.storm.hbase.bolt.mapper.SimpleHBaseMapper;
 import org.apache.storm.hbase.security.HBaseSecurityUtil;
@@ -31,9 +30,15 @@ import java.util.Map;
 
 public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     private static final Logger LOG = Logger.getLogger(TruckEventKafkaExperimTopology.class);
-    
+
     private static final String DANGEROUS_EVENTS_TABLE_NAME = "driver_dangerous_events";
     private static final String EVENTS_TABLE_COLUMN_FAMILY_NAME = "events";
+
+    private static final String EVENTS_TABLE_NAME = "driver_events";
+    private static final String ALL_EVENTS_TABLE_COLUMN_FAMILY_NAME = "allevents";
+
+    private static final String EVENTS_COUNT_TABLE_NAME = "driver_dangerous_events_count";
+    private static final String EVENTS_COUNT_TABLE_COLUMN_FAMILY_NAME = "counters";
 
     public TruckEventKafkaExperimTopology(String configFileLocation) throws Exception {
         super(configFileLocation);
@@ -57,8 +62,9 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
 		 */
         Config config = new Config();
         config.setDebug(true);
-        
-        
+
+        Map<String, Object> hbaseConf = new HashMap<String, Object>();
+        config.put("hbase.conf", hbaseConf);
                 
         /* Set the number of workers that will be spun up for this topology.
 		 * Each worker represents a JVM where executor thread will be spawned from */
@@ -69,10 +75,13 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         String nimbusHost = topologyConfig.getProperty("nimbus.host");
         config.put(Config.NIMBUS_HOST, nimbusHost);
 
-        /* Set up Kafka Spout to ingest from */
+        // Set up Kafka Spout to ingest from Simulator
         configureKafkaSpout(builder);
-        
-        /* Set up HBaseBolt to write to HBase tables */
+
+	// Set up RouteBolt to emit tuples to be collected by other bolts
+        configureRouteBolt(builder);
+
+        // Set up HBaseBolt to collect tuples from RouteBolt and write to HBase tables
         configureHBaseBolt(builder);
         
         //Try to submit topology
@@ -86,7 +95,7 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
 
 
 
-    /* Set up Kafka Spout to ingest data from simulator */
+    // Set up Kafka Spout to ingest data from simulator
     public int configureKafkaSpout(TopologyBuilder builder) {
         KafkaSpout kafkaSpout = constructKafkaSpout();
 
@@ -118,11 +127,51 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
 
         return spoutConfig;
     }
-    public void configureHBaseBolt(TopologyBuilder builder){
-    	
-        RouteBolt hbase = new RouteBolt(topologyConfig);
+    
+    //Set up RouteBolt to collect tuples from kafkaspout and emit tuples to other entities
+    public void configureRouteBolt(TopologyBuilder builder) {
+        RouteBolt hbase = new RouteBolt(true);
         //Defines new bolt in topology
-        builder.setBolt("route_bolt_hbase", hbase, 2).fieldsGrouping("kafkaSpout", new Fields("driverId", "truckId",
+        builder.setBolt("route_bolt", hbase, 2).shuffleGrouping("kafkaSpout");
+
+    }
+
+    //Set up HBaseBolt to collect tuples from RouteBolt and write data to HBase Tables
+    public void configureHBaseBolt(TopologyBuilder builder){
+
+
+        //Store the incident event in HBase Table driver_dangerous_events
+        SimpleHBaseMapper mapper_DangerousEventsTable = new SimpleHBaseMapper()
+                .withRowKeyField("hbaseRowKey")
+                .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude",
+                        "driverName", "routeId", "routeName"))
+                .withColumnFamily(EVENTS_TABLE_COLUMN_FAMILY_NAME);
+
+        HBaseBolt hbase = new HBaseBolt(DANGEROUS_EVENTS_TABLE_NAME, mapper_DangerousEventsTable).withConfigKey("hbase.conf");
+        builder.setBolt("Hbase_Bolt", hbase, 2).fieldsGrouping("route_bolt", new Fields("driverId", "truckId",
                 "eventTime", "eventType", "latitude", "longitude", "driverName", "routeId", "routeName", "hbaseRowKey"));
+
+
+
+        //Update the running count of all incidents for driver_dangerous_events_count HBase Table
+      /*  SimpleHBaseMapper mapper_EventsCountTable = new SimpleHBaseMapper()
+                .withRowKeyField("driverId")
+                .withCounterFields(new Fields("incidentRunningTotal"))
+                .withColumnFamily(EVENTS_COUNT_TABLE_COLUMN_FAMILY_NAME);
+
+        HBaseBolt hbase = new HBaseBolt(EVENTS_COUNT_TABLE_NAME, mapper_EventsCountTable).withConfigKey("hbase.conf");
+
+        //Write to HBase DriverEventsTable
+        SimpleHBaseMapper mapper_DriverEventsTable = new SimpleHBaseMapper()
+                 .withRowKeyField(hbaseRowKey)
+                 .withColumnFields(new Fields("driverId", "truckId", "eventTime", "eventType", "latitude", "longitude",
+                                "driverName", "routeId", "routeName"))
+                 .withColumnFamily(ALL_EVENTS_TABLE_COLUMN_FAMILY_NAME);
+
+        HBaseBolt hbase = new HBaseBolt(EVENTS_TABLE_NAME, mapper_DriverEventsTable).withConfigKey("hbase.conf");
+
+        */
+
+
     }
 }
