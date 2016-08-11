@@ -88,7 +88,7 @@ public class RouteBolt extends BaseRichBolt {
         // Not Normal Events
         if (!eventType.equals(EventType.NORMAL)) {
             //RouteBolt emits a tuple with 11 fields relating to truckevents
-            outputCollector.emit(EventTypeStream.NOT_NORMAL.toString(), input, new Values(driverId, truckId, eventTime, eventType, longitude, latitude,
+            outputCollector.emit(EventTypeStream.NOT_NORMAL.getStream(), input, new Values(driverId, truckId, eventTime, eventType, longitude, latitude,
                     incidentTotalCount, driverName, routeId, routeName, hbaseRowKey));
         }
 
