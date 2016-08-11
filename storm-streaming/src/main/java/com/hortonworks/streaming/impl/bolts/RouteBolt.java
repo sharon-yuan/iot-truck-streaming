@@ -1,5 +1,8 @@
 package com.hortonworks.streaming.impl.bolts;
 
+import com.hortonworks.streaming.impl.bolts.common.EventType;
+import com.hortonworks.streaming.impl.bolts.common.EventTypeStream;
+import com.hortonworks.streaming.impl.topologies.TruckEventKafkaExperimTopology;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 
@@ -10,6 +13,7 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Logger;
+
 import java.sql.Timestamp;
 
 //new imported packages for TruckHBaseBolt
@@ -30,9 +34,8 @@ import java.util.LinkedList;
 
 /**
  * Basic bolt for writing to HBase.
- *
+ * <p>
  * Note: Each HBaseBolt defined in Topology is tied to a specific table.
- *
  */
 
 public class RouteBolt extends BaseRichBolt {
@@ -49,7 +52,7 @@ public class RouteBolt extends BaseRichBolt {
     private OutputCollector outputCollector;
     private boolean persistAllEvents;
 
-    public RouteBolt( Boolean persistAllEvents){
+    public RouteBolt(Boolean persistAllEvents) {
         this.persistAllEvents = persistAllEvents;
     }
 
@@ -76,12 +79,20 @@ public class RouteBolt extends BaseRichBolt {
         long incidentTotalCount = 100;
         String hbaseRowKey = constructHbaseRowKey(driverId, truckId, eventTime);
 
-        /*
+
         LOG.info("driver ID " + driverId + "truckId " + truckId + " eventTime " + eventTime);
         LOG.info("eventType " + eventType + " longitude " + longitude + " latitude " + latitude);
         LOG.info("driverName " + driverName + " routeId " + routeId + " routeName " + routeName);
-        */
 
+
+        // Not Normal Events
+        if (!eventType.equals(EventType.NORMAL)) {
+            //RouteBolt emits a tuple with 11 fields relating to truckevents
+            outputCollector.emit(EventTypeStream.NOT_NORMAL.toString(), input, new Values(driverId, truckId, eventTime, eventType, longitude, latitude,
+                    incidentTotalCount, driverName, routeId, routeName, hbaseRowKey));
+        }
+
+        // All other events go into the "default" stream
         //RouteBolt emits a tuple with 11 fields relating to truckevents
         outputCollector.emit(input, new Values(driverId, truckId, eventTime, eventType, longitude, latitude,
                 incidentTotalCount, driverName, routeId, routeName, hbaseRowKey));
@@ -89,6 +100,7 @@ public class RouteBolt extends BaseRichBolt {
         //acknowledge even if there is an error
         outputCollector.ack(input);
     }
+
 
     //retrieves infraction count per driver
    /*private long getInfractionCountForDriver(int driverId) {
@@ -113,12 +125,12 @@ public class RouteBolt extends BaseRichBolt {
         }
     
     }*/
-    
+
     /*Declares RouteBolt emits 1-tuples with 11 fields called "driverId", "truckId", "eventTime", "eventType", "longitude", "latitude",
             "incidentTotalCount", "driverName", "routeId", "routeName", "hbaseRowKey".*/
-     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-         declarer.declare(new Fields("driverId", "truckId", "eventTime", "eventType", "longitude", "latitude",
-            "incidentTotalCount", "driverName", "routeId", "routeName", "hbaseRowKey"));
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+        declarer.declare(new Fields("driverId", "truckId", "eventTime", "eventType", "longitude", "latitude",
+                "incidentTotalCount", "driverName", "routeId", "routeName", "hbaseRowKey"));
     }
 
     //Constructs HBaseRowKey
@@ -126,7 +138,7 @@ public class RouteBolt extends BaseRichBolt {
         long reverseTime = Long.MAX_VALUE - ts2.getTime();
         String rowKey = driverId + "|" + truckId + "|" + reverseTime;
         return rowKey;
-  }
+    }
 
 
 }
