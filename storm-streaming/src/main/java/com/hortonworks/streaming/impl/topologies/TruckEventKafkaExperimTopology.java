@@ -161,18 +161,18 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     }
 
     private void setNotNormalEventsBolt(TopologyBuilder builder) {
-        System.out.println("Stream ID: " + EventTypeStream.NOT_NORMAL.toString());
+        System.out.println("Stream ID: " + EventTypeStream.NOT_NORMAL.getStream());
         //Store incident events into HBase Table driver_dangerous_events
         final HBaseBolt hbaseDriverDangerousEventsTable =
                 new HBaseBolt(DANGEROUS_EVENTS_TABLE_NAME, getMapperDangerousEventsTable()).withConfigKey("hbase.conf");
 
         builder.setBolt("hbaseDangerousEvents", hbaseDriverDangerousEventsTable, 2)
-                .fieldsGrouping("routeBolt", EventTypeStream.NOT_NORMAL.toString(), getFields());
+                .fieldsGrouping("routeBolt", EventTypeStream.NOT_NORMAL.getStream(), getFields());
 
         //Update the running count of all incidents for driver_dangerous_events_count HBase Table
         final HBaseBolt hbaseEventsCountTable = new HBaseBolt(EVENTS_COUNT_TABLE_NAME, getMapperEventsCountTable()).withConfigKey("hbase.conf");
         builder.setBolt("hbaseDangerousEventsCount", hbaseEventsCountTable, 2)
-                .fieldsGrouping("routeBolt", EventTypeStream.NOT_NORMAL.toString(),
+                .fieldsGrouping("routeBolt", EventTypeStream.NOT_NORMAL.getStream(),
                         new Fields("driverId", "incidentRunningTotal"));
     }
 
