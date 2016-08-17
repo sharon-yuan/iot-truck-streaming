@@ -43,7 +43,7 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
 
     private static final String EVENTS_COUNT_TABLE_NAME = "driver_dangerous_events_count";
     private static final String EVENTS_COUNT_TABLE_COLUMN_FAMILY_NAME = "counters";
-    
+
     //HBase RowKey
     private static final String HBASE_ROW_KEY = "hbaseRowKey";
 
@@ -102,6 +102,12 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
         //driver_dangerous_events, driver_events, data received from RouteBolt
         //driver_dangerous_events_count stores incidents per driver, data received from CountBolt
         configureHBaseBolt(builder);
+
+        //TODO: Create HDFS Bolt
+        //configureHdfsBolt(builder);
+
+        //TODO: Create Hive Bolt
+        //configureHiveBolt(builder);
 
         //Try to submit topology
         try {
@@ -233,4 +239,14 @@ public class TruckEventKafkaExperimTopology extends BaseTruckEventTopology {
     private Fields getDriverIncidentFields() {
         return new Fields("driverId");
     }
+
+    //TODO: Create Hdfs Bolt Definition
+    //TODO: Refer to how bolt was built in previous topology https://github.com/james94/iot-truck-streaming/blob/hdp25experiment/storm-streaming/src/main/java/com/hortonworks/streaming/impl/topologies/TruckEventProcessorKafkaTopology.java
+    //TODO: Refer to http://storm.apache.org/releases/1.0.1/storm-hdfs.html
+    //private void configureHdfsBolt(TopologyBuilder builder) {}
+
+    //TODO: Create Hive Bolt Definition
+    //TODO: Refer to how bolt was built in previous topology, Hive and HDFS were merged
+    //TODO: Refer to http://storm.apache.org/releases/1.0.1/storm-hive.html
+    //configureHiveBolt(builder);
 }
