@@ -26,7 +26,12 @@ import java.util.Properties;
  */
 public class KafkaBolt<K, V> extends BaseRichBolt {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KafkaBolt.class);
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private static final Logger LOG = LoggerFactory.getLogger(KafkaBolt.class);
 
     public static final String TOPIC = "topic";
     public static final String KAFKA_BROKER_PROPERTIES = "kafka.broker.properties";
@@ -40,7 +45,7 @@ public class KafkaBolt<K, V> extends BaseRichBolt {
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-        Map configMap = (Map) stormConf.get(KAFKA_BROKER_PROPERTIES);
+        Map configMap = (Map<?, ?>) stormConf.get(KAFKA_BROKER_PROPERTIES);
         Properties properties = new Properties();
         properties.putAll(configMap);
         ProducerConfig config = new ProducerConfig(properties);
