@@ -117,7 +117,7 @@ private HTableInterface eventsTable;
         LOG.info("Success inserting event into counts table");
 
       } catch (Exception e) {
-        LOG.error("	Error inserting violation event into HBase table", e);
+        LOG.error("Error inserting violation event into HBase table", e);
       }
     }
 
