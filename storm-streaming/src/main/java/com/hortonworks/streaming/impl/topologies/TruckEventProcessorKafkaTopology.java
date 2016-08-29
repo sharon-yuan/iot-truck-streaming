@@ -40,6 +40,7 @@ public class TruckEventProcessorKafkaTopology extends BaseTruckEventTopology {
   }
 
 public void kafkaSpoutHbaseBolt(){
+
 	  TopologyBuilder builder = new TopologyBuilder();
 	 // KafkaSpout kafkaSpout = constructKafkaSpout();
 
@@ -69,7 +70,7 @@ public void kafkaSpoutHbaseBolt(){
   }
   public void buildAndSubmit() throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
-
+	LOG.info("start config");
 		/* Set up Kafka Spout to ingest from */
     configureKafkaSpout(builder);
 
@@ -100,19 +101,21 @@ public void kafkaSpoutHbaseBolt(){
 		 * 	Zookeeper server, nimbus server, ports, etc... All of this configuration will be picked up
 		 * in the ~/.storm/storm.yaml file that will be located on each storm node.
 		 */
+	LOG.info("start config--2");
     Config conf = new Config();
     conf.setDebug(true);
 		/* Set the number of workers that will be spun up for this topology.
 		 * Each worker represents a JVM where executor thread will be spawned from */
     Integer topologyWorkers = Integer.valueOf(topologyConfig.getProperty("storm.trucker.topology.workers"));
     conf.put(Config.TOPOLOGY_WORKERS, topologyWorkers);
-
+	LOG.info("start config--3");
     //Read the nimbus host in from the config file as well
     String nimbusHost = topologyConfig.getProperty("nimbus.host");
     conf.put(Config.NIMBUS_HOST, nimbusHost);
 
     try {
       StormSubmitter.submitTopology("truck-event-processor", conf, builder.createTopology());
+  	LOG.info("start config--4");
     } catch (Exception e) {
       LOG.error("Error submiting Topology", e);
     }
