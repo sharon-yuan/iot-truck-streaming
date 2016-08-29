@@ -56,8 +56,6 @@ public class WebSocketBolt implements IRichBolt {
   @Override
   public void execute(Tuple input) {
     LOG.info("About to process tuple[" + input + "]");
-
-
     int driverId = input.getIntegerByField("driverId");
     int truckId = input.getIntegerByField("truckId");
     Timestamp eventTime = (Timestamp) input.getValueByField("eventTime");
