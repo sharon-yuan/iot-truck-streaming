@@ -36,10 +36,14 @@ public class TruckHBaseBolt implements IRichBolt {
 
 
   private OutputCollector collector;
-  private HConnection connection;
-  private HTableInterface dangerousEventsTable;
-  private HTableInterface eventsCountTable;
-  private HTableInterface eventsTable;
+  @SuppressWarnings("deprecation")
+private HConnection connection;
+  @SuppressWarnings("deprecation")
+private HTableInterface dangerousEventsTable;
+  @SuppressWarnings("deprecation")
+private HTableInterface eventsCountTable;
+  @SuppressWarnings("deprecation")
+private HTableInterface eventsTable;
 
   private boolean persistAllEvents;
 
@@ -61,7 +65,8 @@ public class TruckHBaseBolt implements IRichBolt {
     return config;
   }
 
-  @Override
+  @SuppressWarnings({ "deprecation", "rawtypes" })
+@Override
   public void prepare(Map stormConf, TopologyContext context,
                       OutputCollector collector) {
 
@@ -141,7 +146,8 @@ public class TruckHBaseBolt implements IRichBolt {
 
   }
 
-  private Put constructRow(String columnFamily, int driverId, int truckId, Timestamp eventTime, String eventType,
+  @SuppressWarnings("deprecation")
+private Put constructRow(String columnFamily, int driverId, int truckId, Timestamp eventTime, String eventType,
                            double latitude, double longitude, String driverName, int routeId, String routeName) {
 
     String rowKey = consructKey(driverId, truckId, eventTime);

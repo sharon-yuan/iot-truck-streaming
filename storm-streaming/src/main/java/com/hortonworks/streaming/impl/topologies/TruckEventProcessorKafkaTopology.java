@@ -39,6 +39,7 @@ public class TruckEventProcessorKafkaTopology extends BaseTruckEventTopology {
   //  truckTopology.kafkaSpoutHbaseBolt();
   }
 
+@SuppressWarnings("deprecation")
 public void kafkaSpoutHbaseBolt(){
 
 	  TopologyBuilder builder = new TopologyBuilder();
@@ -68,7 +69,8 @@ public void kafkaSpoutHbaseBolt(){
 	    }
 	  
   }
-  public void buildAndSubmit() throws Exception {
+  @SuppressWarnings("deprecation")
+public void buildAndSubmit() throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 	LOG.info("start config");
 		/* Set up Kafka Spout to ingest from */
