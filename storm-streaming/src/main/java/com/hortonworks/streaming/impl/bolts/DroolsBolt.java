@@ -27,7 +27,11 @@ import java.util.concurrent.Executors;
 
 public class DroolsBolt implements IRichBolt, AgendaEventListener {
 
-  private static final Logger LOG = Logger.getLogger(DroolsBolt.class);
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6601315061316530248L;
+private static final Logger LOG = Logger.getLogger(DroolsBolt.class);
   long alertGapThreshold = 5000;
   private OutputCollector collector;
   private StatefulKnowledgeSession ksession = null;
@@ -39,7 +43,8 @@ public class DroolsBolt implements IRichBolt, AgendaEventListener {
   }
 
 
-  public void prepare(Map stormConf, TopologyContext context,
+  @SuppressWarnings("rawtypes")
+public void prepare(Map stormConf, TopologyContext context,
                       OutputCollector collector) {
 
     this.collector = collector;
@@ -97,7 +102,8 @@ public class DroolsBolt implements IRichBolt, AgendaEventListener {
 
   public void emit(TruckEvent event) {
     LOG.info("Entered drool bolt emit...");
-    SimpleDateFormat sdf = new SimpleDateFormat();
+    @SuppressWarnings("unused")
+	SimpleDateFormat sdf = new SimpleDateFormat();
 
 
     collector.emit(new Values(
@@ -172,7 +178,8 @@ public class DroolsBolt implements IRichBolt, AgendaEventListener {
     // TODO Auto-generated method stub
     System.out.println("entered afterActivationFired");
 
-    List objects = arg0.getActivation().getObjects();
+    @SuppressWarnings("rawtypes")
+	List objects = arg0.getActivation().getObjects();
 
 
     for (Object obj : objects) {

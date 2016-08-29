@@ -25,7 +25,8 @@ public class TruckEventRuleBolt implements IRichBolt {
     this.ruleEngine = new TruckEventRuleEngine(kafkaConfig);
   }
 
-  @Override
+  @SuppressWarnings("rawtypes")
+@Override
   public void prepare(Map stormConf, TopologyContext context,
                       OutputCollector collector) {
     this.collector = collector;

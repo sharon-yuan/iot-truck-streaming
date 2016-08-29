@@ -32,9 +32,15 @@ import java.util.Date;
 
 public class PredictionBoltJPMML implements IRichBolt {
 
-  private static final Logger LOG = Logger.getLogger(PredictionBolt.class);
-  private String phoenixDriverPath;
-  private Driver phoenixDriver;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -6195476732454439624L;
+private static final Logger LOG = Logger.getLogger(PredictionBolt.class);
+  @SuppressWarnings("unused")
+private String phoenixDriverPath;
+  @SuppressWarnings("unused")
+private Driver phoenixDriver;
   private Properties topologyConfig;
   private OutputCollector collector;
   private Evaluator modelEvaluator;
@@ -45,7 +51,8 @@ public class PredictionBoltJPMML implements IRichBolt {
   }
 
 
-  public void prepare(Map stormConf, TopologyContext context,
+  @SuppressWarnings("rawtypes")
+public void prepare(Map stormConf, TopologyContext context,
                       OutputCollector collector) {
     this.collector = collector;
     modelEvaluator = instantiateJPMMLModel();
@@ -222,7 +229,8 @@ public class PredictionBoltJPMML implements IRichBolt {
     // loop over and prepare each argument
     int idx = 0;
     for (FieldName activeField : activeFields) {
-      DataField dataField = evaluator.getDataField(activeField);
+      @SuppressWarnings("unused")
+	DataField dataField = evaluator.getDataField(activeField);
       arguments.put(activeField, evaluator.prepare(activeField, inputValues[idx]));
       idx++;
     }

@@ -38,7 +38,8 @@ public class WebSocketBolt implements IRichBolt {
     this.config = config;
   }
 
-  @Override
+  @SuppressWarnings("rawtypes")
+@Override
   public void prepare(Map stormConf, TopologyContext context,
                       OutputCollector collector) {
     this.collector = collector;

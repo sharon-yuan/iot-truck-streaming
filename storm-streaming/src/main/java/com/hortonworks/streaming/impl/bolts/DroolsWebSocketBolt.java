@@ -16,7 +16,12 @@ import java.util.Properties;
 public class DroolsWebSocketBolt implements IRichBolt {
 
 
-  private static final Logger LOG = Logger.getLogger(DroolsWebSocketBolt.class);
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3725156767573552247L;
+
+private static final Logger LOG = Logger.getLogger(DroolsWebSocketBolt.class);
 
   private OutputCollector collector;
   private Properties config;
@@ -31,7 +36,8 @@ public class DroolsWebSocketBolt implements IRichBolt {
   }
 
 
-  public void prepare(Map stormConf, TopologyContext context,
+  @SuppressWarnings("rawtypes")
+public void prepare(Map stormConf, TopologyContext context,
                       OutputCollector collector) {
     this.collector = collector;
     this.user = config.getProperty("notification.topic.user");

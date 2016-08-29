@@ -28,15 +28,18 @@ public class PredictionWebSocketBolt implements IRichBolt {
   private String topicName;
 
 
-  private boolean sendAllEventsToTopic;
-  private String allEventsTopicName;
+  @SuppressWarnings("unused")
+private boolean sendAllEventsToTopic;
+  @SuppressWarnings("unused")
+private String allEventsTopicName;
 
 
   public PredictionWebSocketBolt(Properties config) {
     this.config = config;
   }
 
-  @Override
+  @SuppressWarnings("rawtypes")
+@Override
   public void prepare(Map stormConf, TopologyContext context,
                       OutputCollector collector) {
     this.collector = collector;

@@ -30,9 +30,15 @@ import java.util.Date;
 
 public class PredictionBolt implements IRichBolt {
 
-  private static final Logger LOG = Logger.getLogger(PredictionBolt.class);
-  private String phoenixDriverPath;
-  private Driver phoenixDriver;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2233871219443599988L;
+private static final Logger LOG = Logger.getLogger(PredictionBolt.class);
+  @SuppressWarnings("unused")
+private String phoenixDriverPath;
+  @SuppressWarnings("unused")
+private Driver phoenixDriver;
 
   private Properties topologyConfig;
 
@@ -45,7 +51,8 @@ public class PredictionBolt implements IRichBolt {
   }
 
 
-  public void prepare(Map stormConf, TopologyContext context,
+  @SuppressWarnings("rawtypes")
+public void prepare(Map stormConf, TopologyContext context,
                       OutputCollector collector) {
     this.collector = collector;
     model = instantiateSparkModel();
