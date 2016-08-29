@@ -35,8 +35,8 @@ public class TruckEventProcessorKafkaTopology extends BaseTruckEventTopology {
   public static void main(String[] args) throws Exception {
     String configFileLocation = args[0];
     TruckEventProcessorKafkaTopology truckTopology = new TruckEventProcessorKafkaTopology(configFileLocation);
-   // truckTopology.buildAndSubmit();
-    truckTopology.kafkaSpoutHbaseBolt();
+  truckTopology.buildAndSubmit();
+  //  truckTopology.kafkaSpoutHbaseBolt();
   }
 
 public void kafkaSpoutHbaseBolt(){
@@ -49,6 +49,22 @@ public void kafkaSpoutHbaseBolt(){
 	  //TruckHBaseBolt hbaseBolt = new TruckHBaseBolt(topologyConfig);
 	  builder.setBolt("hbase_bolt", new TruckHBaseBolt(topologyConfig), 2).shuffleGrouping("kafkaSpout");
 	  
+	  Config conf = new Config();
+	    conf.setDebug(true);
+			/* Set the number of workers that will be spun up for this topology.
+			 * Each worker represents a JVM where executor thread will be spawned from */
+	    Integer topologyWorkers = Integer.valueOf(topologyConfig.getProperty("storm.trucker.topology.workers"));
+	    conf.put(Config.TOPOLOGY_WORKERS, topologyWorkers);
+
+	    //Read the nimbus host in from the config file as well
+	    String nimbusHost = topologyConfig.getProperty("nimbus.host");
+	    conf.put(Config.NIMBUS_HOST, nimbusHost);
+
+	    try {
+	      StormSubmitter.submitTopology("truck-event-processor", conf, builder.createTopology());
+	    } catch (Exception e) {
+	      LOG.error("Error submiting Topology", e);
+	    }
 	  
   }
   public void buildAndSubmit() throws Exception {
