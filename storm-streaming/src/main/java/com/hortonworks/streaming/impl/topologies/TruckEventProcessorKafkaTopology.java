@@ -38,6 +38,18 @@ public class TruckEventProcessorKafkaTopology extends BaseTruckEventTopology {
     truckTopology.buildAndSubmit();
   }
 
+public void kafkaSpoutHbaseBolt(){
+	  TopologyBuilder builder = new TopologyBuilder();
+	 // KafkaSpout kafkaSpout = constructKafkaSpout();
+
+	    int spoutCount = Integer.valueOf(topologyConfig.getProperty("spout.thread.count"));
+	  
+	    builder.setSpout("kafkaSpout", constructKafkaSpout(), spoutCount);
+	  //TruckHBaseBolt hbaseBolt = new TruckHBaseBolt(topologyConfig);
+	  builder.setBolt("hbase_bolt", new TruckHBaseBolt(topologyConfig), 2).shuffleGrouping("kafkaSpout");
+	  
+	  
+  }
   public void buildAndSubmit() throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 
