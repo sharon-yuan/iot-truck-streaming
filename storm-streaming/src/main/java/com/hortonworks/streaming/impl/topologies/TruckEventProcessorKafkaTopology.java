@@ -34,8 +34,8 @@ public class TruckEventProcessorKafkaTopology extends BaseTruckEventTopology {
 	public static void main(String[] args) throws Exception {
 		String configFileLocation = args[0];
 		TruckEventProcessorKafkaTopology truckTopology = new TruckEventProcessorKafkaTopology(configFileLocation);
-		//truckTopology.buildAndSubmit();
-		truckTopology.WSYBuildAndSubmit();
+		truckTopology.buildAndSubmit();
+		//truckTopology.WSYBuildAndSubmit();
 
 	}
 
